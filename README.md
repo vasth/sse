@@ -49,17 +49,6 @@ Clients can connect to this stream once the http handler is started by specifyin
 http://server/events?stream=messages
 ```
 
-```go
-req, err := http.NewRequestWithContext(ctx, http.MethodPost, "https://api.openai.com/v1/chat/completions", bytes.NewBuffer(body))
-if err != nil {
-    return nil, err
-}
-req.Header.Set("Content-Type", "application/json")
-req.Header.Set("Authorization", "Bearer "+a.authToken)
-
-client := sse.NewClientFromReq(req)
-
-```
 
 In order to start the http server:
 
@@ -170,6 +159,33 @@ To set custom query parameters on the client or disable the stream parameter alt
 ```go
 func main() {
 	client := sse.NewClient("http://server/events?search=example")
+
+	client.SubscribeRaw(func(msg *sse.Event) {
+		// Got some data!
+		fmt.Println(msg.Data)
+	})
+}
+```
+
+#### Use POST method
+
+To set custom query parameters on the client or disable the stream parameter altogether:
+
+```go
+func main() {
+
+	params := map[string]string{
+		"key": "value",
+	}
+	data := url.Values{}
+	for k, v := range params {
+		data.Add(k, v)
+	}
+	client := sse.NewClient("http://server/events?search=example", func(c *sse.Client) {
+		c.Headers["Content-Type"] = "application/x-www-form-urlencoded"
+		c.Method = http.MethodPost
+		c.Body = strings.NewReader(data.Encode())
+	})
 
 	client.SubscribeRaw(func(msg *sse.Event) {
 		// Got some data!
