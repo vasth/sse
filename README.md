@@ -49,6 +49,17 @@ Clients can connect to this stream once the http handler is started by specifyin
 http://server/events?stream=messages
 ```
 
+```go
+req, err := http.NewRequestWithContext(ctx, http.MethodPost, "https://api.openai.com/v1/chat/completions", bytes.NewBuffer(body))
+if err != nil {
+    return nil, err
+}
+req.Header.Set("Content-Type", "application/json")
+req.Header.Set("Authorization", "Bearer "+a.authToken)
+
+client := sse.NewClientFromReq(req)
+
+```
 
 In order to start the http server:
 
